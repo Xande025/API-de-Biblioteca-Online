@@ -87,8 +87,9 @@ A autenticação é feita por meio de **JWT (JSON Web Tokens)**. Algumas rotas s
 - Melhorar as verificações de segurança, como bloqueio após várias tentativas de login.
 - Adicionar testes automatizados para as rotas principais.
 
-## Contribuição
-Sinta-se à vontade para contribuir com este projeto. Abra issues e pull requests para melhorias, correções ou novas funcionalidades.
+## Contribuídores
+<a href="https://github.com/Duduenri"><img src="https://github.com/Duduenri.png" width="45" height="45"></a> &nbsp;
+<a href="https://github.com/Xande025"><img src="https://github.com/Xande025.png" width="45" height="45"></a> &nbsp;
 
 ## Licença
 Este projeto é distribuído sob a licença MIT.
