@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client"
 import { Router } from "express"
 import bcrypt from 'bcrypt'
 
-// const prisma = new PrismaClient()
 const prisma = new PrismaClient({
   log: [
     {
@@ -33,62 +32,35 @@ prisma.$on('query', (e) => {
 
 const router = Router()
 
-router.post("/", async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, senha } = req.body
 
-  // em termos de segurança, o recomendado é exibir uma mensagem padrão
-  // a fim de evitar de dar "dicas" sobre o processo de login para hackers
-  const mensaPadrao = "Login ou senha incorretos"
-
-  if (!email || !senha) {
-    // res.status(400).json({ erro: "Informe e-mail e senha do usuário" })
-    res.status(400).json({ erro: mensaPadrao })
-    return
-  }
-
   try {
-    const usuario = await prisma.usuario.findFirst({
-      where: { email }
+    const usuario = await prisma.usuario.findUnique({ where: { email } })
+    if (!usuario) {
+      return res.status(401).json({ erro: "Usuário não encontrado" })
+    }
+
+    const senhaValida = await bcrypt.compare(senha, usuario.senha)
+    if (!senhaValida) {
+      return res.status(401).json({ erro: "Senha inválida" })
+    }
+
+    const token = jwt.sign({ id: usuario.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+
+    const ultimoLogin = usuario.ultimoLogin
+    await prisma.usuario.update({
+      where: { id: usuario.id },
+      data: { ultimoLogin: new Date() }
     })
 
-    if (usuario == null) {
-      // res.status(400).json({ erro: "E-mail inválido" })
-      res.status(400).json({ erro: mensaPadrao })
-      return
-    }
+    const mensagem = ultimoLogin
+      ? `Bem-vindo ${usuario.nome}. Seu último acesso ao sistema foi em ${ultimoLogin.toLocaleString()}`
+      : `Bem-vindo ${usuario.nome}. Este é o seu primeiro acesso ao sistema`
 
-    // se o e-mail existe, faz-se a comparação dos hashs
-    if (bcrypt.compareSync(senha, usuario.senha)) {
-      // se confere, gera e retorna o token
-      const token = jwt.sign({
-        userLogadoId: usuario.id,
-        userLogadoNome: usuario.nome
-      },
-        process.env.JWT_KEY as string,
-        { expiresIn: "1h" }
-      )
-
-      res.status(200).json({
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-        token
-      })
-    } else {
-      // res.status(400).json({ erro: "Senha incorreta" })
-
-      await prisma.log.create({
-        data: { 
-          descricao: "Tentativa de Acesso Inválida", 
-          complemento: `Funcionário: ${usuario.email}`,
-          usuarioId: usuario.id
-        }
-      })
-
-      res.status(400).json({ erro: mensaPadrao })
-    }
+    res.status(200).json({ token, mensagem })
   } catch (error) {
-    res.status(400).json(error)
+    res.status(500).json({ erro: "Erro ao fazer login" })
   }
 })
 

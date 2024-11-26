@@ -44,6 +44,7 @@ model Usuario {
   senha        String    @db.VarChar(60)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  ultimoLogin  DateTime? // Campo para armazenar a data/hora do último login
   livros       Livro[]
   logs         Log[]
 
