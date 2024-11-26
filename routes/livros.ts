@@ -23,6 +23,7 @@ const livroSchema = z.object({
 router.get("/", async (req, res) => {
   try {
     const livros = await prisma.livro.findMany({
+      where: { deleted: false }, // Filtra apenas livros não deletados
       orderBy: { id: 'desc' },
       select: {
         id: true,
@@ -57,7 +58,10 @@ router.post("/", verificaToken, async (req, res) => {
 
   try {
     const livro = await prisma.livro.create({
-      data: valida.data
+      data: {
+        ...valida.data,
+        deleted: false // Define o valor inicial de deleted como false
+      }
     })
     res.status(201).json(livro)
   } catch (error) {
@@ -69,13 +73,15 @@ router.delete("/:id", verificaToken, async (req: any, res) => {
   const { id } = req.params
 
   try {
-    const livro = await prisma.livro.delete({
-      where: { id: Number(id) }
+    // Marca o livro como deletado, ao invés de removê-lo
+    const livro = await prisma.livro.update({
+      where: { id: Number(id) },
+      data: { deleted: true }
     })
 
     await prisma.log.create({
       data: { 
-        descricao: `Exclusão do Livro: ${id}`, 
+        descricao: `Soft delete do Livro: ${id}`, 
         complemento: `Funcionário: ${req.userLogadoNome}`,
         usuarioId: req.userLogadoId
       }
@@ -143,7 +149,7 @@ router.get("/pesquisa/:titulo", async (req, res) => {
   const { titulo } = req.params
   try {
     const livros = await prisma.livro.findMany({
-      where: { titulo: { contains: titulo } },
+      where: { titulo: { contains: titulo }, deleted: false }, // Filtra apenas livros não deletados
       select: {
         id: true,
         titulo: true,

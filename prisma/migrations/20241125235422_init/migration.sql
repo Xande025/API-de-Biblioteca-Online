@@ -2,12 +2,13 @@
 CREATE TABLE `livros` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `titulo` VARCHAR(100) NOT NULL,
-    `autor` VARCHAR(60) NOT NULL,
-    `genero` VARCHAR(30) NULL,
-    `anoPublicacao` SMALLINT NOT NULL,
+    `autor` VARCHAR(100) NOT NULL,
+    `anoPublicacao` INTEGER NOT NULL,
     `preco` DECIMAL(10, 2) NOT NULL,
-    `disponibilidade` ENUM('DISPONIVEL', 'EMPRESTADO', 'RESERVADO') NOT NULL DEFAULT 'DISPONIVEL',
-    `paginas` MEDIUMINT NOT NULL DEFAULT 0,
+    `genero` VARCHAR(50) NULL,
+    `disponibilidade` ENUM('DISPONIVEL', 'INDISPONIVEL') NULL,
+    `paginas` INTEGER NULL,
+    `deleted` BOOLEAN NOT NULL DEFAULT false,
     `usuarioId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -32,6 +33,7 @@ CREATE TABLE `logs` (
     `descricao` VARCHAR(60) NOT NULL,
     `complemento` VARCHAR(255) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
     `usuarioId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
