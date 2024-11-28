@@ -22,6 +22,7 @@ CREATE TABLE `usuarios` (
     `senha` VARCHAR(60) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `ultimoLogin` DATETIME(3) NULL,
 
     UNIQUE INDEX `usuarios_email_key`(`email`),
     PRIMARY KEY (`id`)
